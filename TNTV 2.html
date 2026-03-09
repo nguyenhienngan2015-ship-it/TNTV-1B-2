@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>TNTV 2</title>
+
+<style>
+body{font-family:Arial;background:#eef3ff;padding:20px}
+.box{background:#fff;padding:15px;border-radius:10px;margin-bottom:20px}
+button{padding:10px;background:#3498db;color:#fff;border:none;border-radius:6px;cursor:pointer}
+button:hover{background:#2980b9}
+.hidden{display:none}
+#timer{color:red;font-weight:bold;font-size:20px}
+.q{margin:12px 0}
+table{border-collapse:collapse;width:100%}
+th,td{border:1px solid #ccc;padding:6px;text-align:center}
+</style>
+
+</head>
+
+<body>
+
+<h1>📘 TNTV 2</h1>
+<h2>👩‍🏫 Giáo viên: Phạm Thị Ngần</h2>
+<h3>📖 Đề Tiếng Việt 1 - Mã 2</h3>
+
+<div class="box" id="loginBox">
+
+<select id="studentName">
+<option value="">-- Chọn học sinh --</option>
+<option>Nguyễn Yến</option>
+<option>Ninh Yến</option>
+<option>Ngọc</option>
+<option>Bảo</option>
+<option>Hân</option>
+<option>Khánh</option>
+<option>Tuấn</option>
+<option>Bảo An</option>
+<option>Bảo Ngọc</option>
+<option>Long</option>
+<option>Hằng</option>
+<option>Tùng</option>
+</select>
+
+<br><br>
+
+<button onclick="startTest()">▶️ Vào làm bài</button>
+<button onclick="showTeacher()">👩‍🏫 Giáo viên</button>
+
+</div>
+
+<div class="box hidden" id="testBox">
+
+⏱ Thời gian còn lại: <span id="timer">30:00</span>
+
+<div id="quiz"></div>
+
+<button onclick="submitTest()">📤 Nộp bài</button>
+
+</div>
+
+<div class="box hidden" id="resultBox">
+
+<h2 id="result"></h2>
+
+<button onclick="location.reload()">🔁 Về trang đầu</button>
+
+</div>
+
+<div class="box hidden" id="teacherBox">
+
+<h2>📊 BẢNG ĐIỂM</h2>
+
+<table>
+
+<thead>
+<tr>
+<th>STT</th>
+<th>Học sinh</th>
+<th>Điểm</th>
+<th>Thời gian</th>
+</tr>
+</thead>
+
+<tbody id="scoreTable"></tbody>
+
+</table>
+
+<br>
+
+<button onclick="backHome()">⬅️ Quay lại</button>
+
+</div>
+
+<script>
+
+let time=1800,timer,currentStudent="";
+
+const quizData=[
+
+{q:"Từ nào viết đúng chính tả?",a:["sạch đẹp","xạch đẹp","sạch đệp","xạch đệp"],d:0},
+{q:"Từ nào đúng?",a:["trời mưa","chời mưa","trời mư a","chời mư a"],d:0},
+{q:"Chọn từ đúng:",a:["con sóc","con xóc","con sót","con xót"],d:0},
+{q:"Từ nào đúng?",a:["sông Hồng","xông Hồng","sông Hòn","xông Hòn"],d:0},
+{q:"Từ nào đúng chính tả?",a:["trường em","chường em","trường êm","chường êm"],d:0},
+{q:"Từ nào đúng?",a:["sư tử","xư tử","sư tữ","xư tữ"],d:0},
+{q:"Chọn từ đúng:",a:["trái bóng","chái bóng","trái bón","chái bón"],d:0},
+{q:"Từ nào đúng?",a:["cái chăn","cái trăn","cái chăn","cái trăn"],d:0},
+{q:"Từ nào đúng chính tả?",a:["sân trường","xân trường","sân chường","xân chường"],d:0},
+{q:"Từ nào đúng?",a:["trống trường","chống trường","trống chường","chống chường"],d:0},
+
+{q:"Chọn từ đúng:",a:["xe buýt","se buýt","xe bút","se bút"],d:0},
+{q:"Từ nào đúng?",a:["sáng sớm","xáng xớm","sáng xớm","xáng sớm"],d:0},
+{q:"Từ nào viết đúng?",a:["chim sẻ","chim xẻ","chim sẻ","chim xẻ"],d:0},
+{q:"Chọn từ đúng:",a:["trời nắng","chời nắng","trời nắn","chời nắn"],d:0},
+{q:"Từ nào đúng?",a:["cây xoài","cây soài","cây xoài","cây soài"],d:0},
+
+{q:"Câu nào viết đúng?",a:[
+"Em yêu trường em.",
+"Em yêu chường em.",
+"Em yêu chường êm.",
+"Em yêu trường êm."
+],d:0},
+
+{q:"Câu nào đúng?",a:[
+"Bé Lan quét nhà.",
+"Bé Lan quyết nhà.",
+"Bé Lan quét nhả.",
+"Bé Lan quyết nhả."
+],d:0},
+
+{q:"Câu nào đúng?",a:[
+"Chúng em chăm học.",
+"Chúng em trăm học.",
+"Chúng em chăm hộc.",
+"Chúng em trăm hộc."
+],d:0},
+
+{q:"Từ nào đúng?",a:["sư tử","xư tử","sư tử","xư tử"],d:0},
+{q:"Từ nào đúng?",a:["trái cây","chái cây","trái cầy","chái cầy"],d:0},
+
+{q:"Từ nào đúng?",a:["sách vở","xách vở","sách vở","xách vở"],d:0},
+{q:"Từ nào đúng?",a:["trăng sáng","chăng sáng","trăng xáng","chăng xáng"],d:0},
+{q:"Từ nào đúng?",a:["sân chơi","xân chơi","sân chới","xân chới"],d:0},
+{q:"Từ nào đúng?",a:["trẻ em","chẻ em","trẻ êm","chẻ êm"],d:0},
+{q:"Từ nào đúng?",a:["sữa tươi","xữa tươi","sữa tưi","xữa tưi"],d:0},
+
+{q:"Câu nào đúng?",a:[
+"Bé Nam rửa tay sạch.",
+"Bé Nam rửa tay xạch.",
+"Bé Nam rửa tay sạnh.",
+"Bé Nam rửa tay xạnh."
+],d:0},
+
+{q:"Câu nào đúng?",a:[
+"Trời hôm nay rất đẹp.",
+"Chời hôm nay rất đẹp.",
+"Trời hôm nay rất đệp.",
+"Chời hôm nay rất đệp."
+],d:0},
+
+{q:"Câu nào đúng?",a:[
+"Chúng em xếp hàng.",
+"Chúng em sép hàng.",
+"Chúng em xép hàng.",
+"Chúng em sép hàn."
+],d:0},
+
+{q:"Từ nào đúng?",a:["sân bóng","xân bóng","sân bống","xân bống"],d:0},
+{q:"Từ nào đúng?",a:["trái tim","chái tim","trái tim","chái tim"],d:0}
+
+];
+
+const quiz=document.getElementById("quiz");
+
+quizData.forEach((q,i)=>{
+let html=`<div class="q"><b>Câu ${i+1}:</b> ${q.q}<br>`;
+q.a.forEach((ans,j)=>{
+html+=`<label><input type="radio" name="q${i}" value="${j}"> ${ans}</label><br>`;
+});
+html+="</div>";
+quiz.innerHTML+=html;
+});
+
+function startTest(){
+
+let name=studentName.value;
+
+if(!name){
+alert("Chọn học sinh!");
+return;
+}
+
+currentStudent=name;
+
+loginBox.classList.add("hidden");
+testBox.classList.remove("hidden");
+
+timer=setInterval(()=>{
+
+let m=Math.floor(time/60),
+s=time%60;
+
+timerSpan.innerText=m+":"+(s<10?"0":"")+s;
+
+time--;
+
+if(time<0)submitTest();
+
+},1000);
+
+}
+
+function submitTest(){
+
+clearInterval(timer);
+
+let score=0;
+
+quizData.forEach((q,i)=>{
+
+let c=document.querySelector(`input[name="q${i}"]:checked`);
+
+if(c && Number(c.value)===q.d)score++;
+
+});
+
+let data=JSON.parse(localStorage.getItem("scores")||"[]");
+
+data.push({
+name:currentStudent,
+score:score+"/30",
+time:new Date().toLocaleTimeString()
+});
+
+localStorage.setItem("scores",JSON.stringify(data));
+
+testBox.classList.add("hidden");
+resultBox.classList.remove("hidden");
+
+result.innerText="🎉 "+currentStudent+" đạt "+score+"/30 điểm";
+
+}
+
+function showTeacher(){
+
+loginBox.classList.add("hidden");
+teacherBox.classList.remove("hidden");
+
+let data=JSON.parse(localStorage.getItem("scores")||"[]");
+
+scoreTable.innerHTML=data.map((r,i)=>
+`<tr>
+<td>${i+1}</td>
+<td>${r.name}</td>
+<td>${r.score}</td>
+<td>${r.time}</td>
+</tr>`
+).join("");
+
+}
+
+function backHome(){
+teacherBox.classList.add("hidden");
+loginBox.classList.remove("hidden");
+}
+
+const timerSpan=document.getElementById("timer");
+
+</script>
+
+</body>
+</html>
